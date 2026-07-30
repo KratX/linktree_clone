@@ -1,4 +1,3 @@
-// app/onboarding/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -37,8 +36,8 @@ export default function OnboardingPage() {
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-12">
             <div className="w-full max-w-md bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900 text-center">Pick your username</h1>
-                <p className="mt-2 text-gray-500 text-center">This will be your public Linktree URL.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900 text-center">Complete your profile</h1>
+                <p className="mt-2 text-gray-500 text-center">Pick a username and create a password so you can log back in later.</p>
 
                 {error && <div className="mt-6 bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">{error}</div>}
 
@@ -55,6 +54,18 @@ export default function OnboardingPage() {
                                 placeholder="johndoe"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input
+                            name="password"
+                            type="password"
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                            placeholder="••••••••"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">Min 8 characters, 1 uppercase, 1 number.</p>
                     </div>
 
                     <button

@@ -1,9 +1,57 @@
+"use client";
+
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams, useRouter } from "next/navigation";
+import { forgotPasswordAction, resetPasswordAction } from "@/actions/emails";
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const token = searchParams.get("token");
+
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // --- LOGIC FOR REQUESTING RESET LINK ---
+    const handleRequestReset = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+        setLoading(true);
+
+        const formData = new FormData(e.currentTarget);
+        const result = await forgotPasswordAction(formData);
+
+        if (result?.error) setError(result.error);
+        if (result?.success) setSuccess(result.success);
+        setLoading(false);
+    };
+
+    // --- LOGIC FOR SETTING NEW PASSWORD ---
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+        setLoading(true);
+
+        const formData = new FormData(e.currentTarget);
+        formData.append("token", token); // Append token from URL
+
+        const result = await resetPasswordAction(formData);
+
+        if (result?.error) {
+            setError(result.error);
+            setLoading(false);
+        } else if (result?.success) {
+            router.push("/login?reset=success");
+        }
+    };
+
     return (
-        <main className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
             <div className="min-h-screen bg-white flex flex-col font-sans">
 
                 {/* Header */}
@@ -27,39 +75,94 @@ export default function ForgotPasswordPage() {
                 <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
                     <div className="w-full max-w-sm space-y-8">
 
-                        {/* Headings */}
-                        <div className="text-center">
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                                Forgot your password?
-                            </h1>
-                            <p className="mt-2 text-gray-600">
-                                Enter your email or username and we&apos;ll send you a link to reset your password.
-                            </p>
-                        </div>
-
-                        {/* Form */}
-                        <form className="space-y-4">
-                            <div>
-                                <label htmlFor="email" className="sr-only">
-                                    Email or username
-                                </label>
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="text"
-                                    required
-                                    placeholder="Email or username"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-gray-900 placeholder-gray-400"
-                                />
+                        {/* Error / Success Messages */}
+                        {error && (
+                            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 text-center">
+                                {error}
                             </div>
+                        )}
+                        {success && (
+                            <div className="bg-green-50 text-green-600 text-sm p-3 rounded-lg border border-green-100 text-center">
+                                {success}
+                            </div>
+                        )}
 
-                            <button
-                                type="submit"
-                                className="w-full bg-black text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200"
-                            >
-                                Send reset link
-                            </button>
-                        </form>
+                        {/* --- CONDITIONAL RENDERING BASED ON TOKEN --- */}
+                        {!token ? (
+                            <>
+                                {/* Headings (Request Reset) */}
+                                <div className="text-center">
+                                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                                        Forgot your password?
+                                    </h1>
+                                    <p className="mt-2 text-gray-600">
+                                        Enter your email or username and we&apos;ll send you a link to reset your password.
+                                    </p>
+                                </div>
+
+                                {/* Form (Request Reset) */}
+                                <form onSubmit={handleRequestReset} className="space-y-4">
+                                    <div>
+                                        <label htmlFor="email" className="sr-only">
+                                            Email or username
+                                        </label>
+                                        <input
+                                            id="email"
+                                            name="email"
+                                            type="text"
+                                            required
+                                            placeholder="Email or username"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-black text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 flex justify-center items-center"
+                                    >
+                                        {loading ? "Sending..." : "Send reset link"}
+                                    </button>
+                                </form>
+                            </>
+                        ) : (
+                            <>
+                                {/* Headings (Set New Password) */}
+                                <div className="text-center">
+                                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                                        Reset Password
+                                    </h1>
+                                    <p className="mt-2 text-gray-600">
+                                        Enter your new password below.
+                                    </p>
+                                </div>
+
+                                {/* Form (Set New Password) */}
+                                <form onSubmit={handleResetPassword} className="space-y-4">
+                                    <div>
+                                        <label htmlFor="password" className="sr-only">
+                                            New Password
+                                        </label>
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type="password"
+                                            required
+                                            placeholder="New password"
+                                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-gray-900 placeholder-gray-400"
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full bg-black text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 flex justify-center items-center"
+                                    >
+                                        {loading ? "Resetting..." : "Reset Password"}
+                                    </button>
+                                </form>
+                            </>
+                        )}
 
                     </div>
                 </main>
@@ -82,6 +185,15 @@ export default function ForgotPasswordPage() {
                     priority
                 />
             </div>
-        </main>
+        </div>
+    );
+}
+
+// Must wrap in Suspense because useSearchParams() requires it in Next.js 15
+export default function ForgotPasswordPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <ForgotPasswordContent />
+        </Suspense>
     );
 }

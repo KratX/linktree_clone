@@ -1,9 +1,35 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { forgotUsernameAction } from "@/actions/emails";
 
 export default function ForgotUsernamePage() {
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+        setLoading(true);
+
+        const formData = new FormData(e.currentTarget);
+        const result = await forgotUsernameAction(formData);
+
+        if (result?.error) {
+            setError(result.error);
+        }
+        if (result?.success) {
+            setSuccess(result.success);
+        }
+        setLoading(false);
+    };
+
     return (
-        <main className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
             <div className="min-h-screen bg-white flex flex-col font-sans">
 
                 {/* Header */}
@@ -37,8 +63,20 @@ export default function ForgotUsernamePage() {
                             </p>
                         </div>
 
+                        {/* Error / Success Messages */}
+                        {error && (
+                            <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 text-center">
+                                {error}
+                            </div>
+                        )}
+                        {success && (
+                            <div className="bg-green-50 text-green-600 text-sm p-3 rounded-lg border border-green-100 text-center">
+                                {success}
+                            </div>
+                        )}
+
                         {/* Form */}
-                        <form className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label htmlFor="email" className="sr-only">
                                     Email address
@@ -55,9 +93,10 @@ export default function ForgotUsernamePage() {
 
                             <button
                                 type="submit"
-                                className="w-full bg-black text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200"
+                                disabled={loading}
+                                className="w-full bg-black text-white font-semibold py-3 rounded-lg hover:bg-gray-800 transition-colors duration-200 disabled:opacity-50 flex justify-center items-center"
                             >
-                                Send email
+                                {loading ? "Sending..." : "Send email"}
                             </button>
                         </form>
 
@@ -82,6 +121,6 @@ export default function ForgotUsernamePage() {
                     priority
                 />
             </div>
-        </main>
+        </div>
     );
 }

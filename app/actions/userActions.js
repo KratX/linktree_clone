@@ -1,4 +1,3 @@
-// app/actions/userActions.js
 "use server";
 
 import { signIn, auth } from "@/auth";
@@ -20,8 +19,11 @@ const signupSchema = z.object({
     password: z.string().min(8, "Password must be at least 8 characters").regex(/[A-Z]/, "Must contain 1 uppercase").regex(/[0-9]/, "Must contain 1 number"),
 });
 
-// Schema for just the username (for Google onboarding)
-const usernameSchema = z.string().min(3, "Username must be at least 3 characters").max(20).regex(/^[a-zA-Z0-9_]+$/, "No special characters allowed");
+// Schema for Google onboarding (Username + Password)
+const onboardingSchema = z.object({
+    username: z.string().min(3, "Username must be at least 3 characters").max(20).regex(/^[a-zA-Z0-9_]+$/, "No special characters allowed"),
+    password: z.string().min(8, "Password must be at least 8 characters").regex(/[A-Z]/, "Must contain 1 uppercase").regex(/[0-9]/, "Must contain 1 number"),
+});
 
 export async function signupAction(formData) {
     const headersList = await headers();
@@ -94,22 +96,25 @@ export async function signupAction(formData) {
     redirect("/dashboard");
 }
 
-// --- NEW ACTION FOR GOOGLE ONBOARDING ---
+// --- ACTION FOR GOOGLE ONBOARDING ---
 export async function setUsernameAction(formData) {
     const session = await auth();
     if (!session?.user?.id) return { error: "Not authenticated" };
 
-    const parsed = usernameSchema.safeParse((formData.get("username") || "").toLowerCase());
+    const parsed = onboardingSchema.safeParse({
+        username: (formData.get("username") || "").toLowerCase(),
+        password: formData.get("password") || "",
+    });
 
     if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-    const username = parsed.data;
+    const { username, password } = parsed.data;
 
     try {
         const client = await clientPromise;
         const db = client.db();
 
-        // 1. Check Bloom Filter & DB for uniqueness
+        // 1. Check Bloom Filter & DB for username uniqueness
         const cacheCollection = db.collection("bloom_cache");
         const usernameCache = await cacheCollection.findOne({ _id: "usernames" });
         if (usernameCache?.state) usernameBloom.importState(usernameCache.state);
@@ -119,15 +124,18 @@ export async function setUsernameAction(formData) {
             if (existingUsername) return { error: "This username is already taken." };
         }
 
-        // 2. Update the user in the database
+        // 2. Hash the new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // 3. Update the user in the database with BOTH username and password
         const result = await db.collection("users").updateOne(
             { _id: new ObjectId(session.user.id) },
-            { $set: { username } }
+            { $set: { username, hashedPassword } }
         );
 
-        if (result.modifiedCount === 0) return { error: "Failed to set username. Please try again." };
+        if (result.modifiedCount === 0) return { error: "Failed to set profile. Please try again." };
 
-        // 3. Update Bloom filter
+        // 4. Update Bloom filter
         usernameBloom.add(username);
         await cacheCollection.updateOne(
             { _id: "usernames" },
