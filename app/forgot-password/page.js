@@ -5,6 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { forgotPasswordAction, resetPasswordAction } from "@/actions/emails";
+import { z } from "zod";
+
+// Define the Zod schema for client-side validation
+const passwordSchema = z.string().min(8, "Password must be at least 8 characters").regex(/[A-Z]/, "Must contain 1 uppercase").regex(/[0-9]/, "Must contain 1 number");
 
 function ForgotPasswordContent() {
     const router = useRouter();
@@ -38,8 +42,19 @@ function ForgotPasswordContent() {
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
-        formData.append("token", token); // Append token from URL
+        const password = formData.get("password");
 
+        // 1. Validate with Zod on the client side
+        const parsed = passwordSchema.safeParse(password);
+        if (!parsed.success) {
+            setError(parsed.error.issues[0].message);
+            setLoading(false);
+            return; // Stop execution if invalid
+        }
+
+        formData.append("token", token);
+
+        // 2. Send to server action (which validates again with Zod)
         const result = await resetPasswordAction(formData);
 
         if (result?.error) {
@@ -151,6 +166,7 @@ function ForgotPasswordContent() {
                                             placeholder="New password"
                                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-gray-900 placeholder-gray-400"
                                         />
+                                        <p className="text-xs text-gray-400 mt-1">Min 8 characters, 1 uppercase, 1 number.</p>
                                     </div>
 
                                     <button

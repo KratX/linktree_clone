@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import ScrollingColumn from "@/components/ScrollingColumn";
 
@@ -25,6 +28,8 @@ const features = [
 ];
 
 export default function Home() {
+  const [username, setUsername] = useState("");
+
   return (
     <main className="min-h-screen bg-white text-slate-900">
       <section className="relative overflow-hidden bg-[#d2e823] px-6 pb-20 pt-32 md:px-10 lg:px-16">
@@ -51,12 +56,14 @@ export default function Home() {
                 <input
                   type="text"
                   placeholder="yourname"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="w-full bg-transparent outline-none ml-1 text-gray-900 placeholder-gray-400 font-medium"
                 />
               </div>
               <Link
-                href="/signup"
-                className="rounded-full border border-black/20 bg-[#254f1a] px-8 py-4 text-center font-semibold text-white transition hover:bg-slate-800"
+                href={`/signup?username=${encodeURIComponent(username)}`}
+                className="rounded-full border border-black/20 bg-[#254f1a] px-8 py-4 text-center font-semibold text-white transition hover:bg-slate-800 whitespace-nowrap"
               >
                 Get started for free
               </Link>
