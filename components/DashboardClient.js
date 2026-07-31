@@ -1,3 +1,4 @@
+// components/DashboardClient.jsx
 "use client";
 
 import { useState, useTransition } from "react";
@@ -20,7 +21,6 @@ export default function DashboardClient({ session, initialLinks }) {
             if (result?.error) {
                 setError(result.error);
             } else if (result?.success) {
-                // FIX: Manually append the new link to the UI instantly
                 setLinks((prevLinks) => [result.link, ...prevLinks]);
                 e.target.reset();
             }
@@ -28,10 +28,15 @@ export default function DashboardClient({ session, initialLinks }) {
     };
 
     const handleDelete = async (id) => {
+        const previousLinks = links;
+        setLinks((prevLinks) => prevLinks.filter(link => link._id !== id));
+
         startTransition(async () => {
-            // Optimistic UI: remove instantly
-            setLinks((prevLinks) => prevLinks.filter(link => link._id !== id));
-            await deleteLinkAction(id);
+            const result = await deleteLinkAction(id);
+            if (result?.error) {
+                setError(result.error);
+                setLinks(previousLinks);
+            }
         });
     };
 
@@ -68,13 +73,27 @@ export default function DashboardClient({ session, initialLinks }) {
                                         exit={{ opacity: 0, x: -20 }}
                                         className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center justify-between"
                                     >
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900">{link.title}</h3>
-                                            <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline truncate block max-w-xs">{link.url}</a>
+                                        <div className="flex-1 min-w-0 mr-4">
+                                            <h3 className="font-semibold text-gray-900 truncate">{link.title}</h3>
+                                            <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline truncate block max-w-xs">
+                                                {link.url}
+                                            </a>
                                         </div>
-                                        <button onClick={() => handleDelete(link._id)} className="text-red-500 hover:text-red-700 text-sm font-medium px-3 py-1 rounded-lg hover:bg-red-50">
-                                            Delete
-                                        </button>
+
+                                        {/* NEW: Click Analytics Badge */}
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-center bg-gray-100 rounded-lg px-3 py-1">
+                                                <p className="text-xs font-bold text-gray-900">{link.clicks || 0}</p>
+                                                <p className="text-[10px] uppercase text-gray-500 tracking-wider">clicks</p>
+                                            </div>
+
+                                            <button
+                                                onClick={() => handleDelete(link._id)}
+                                                className="text-red-500 hover:text-red-700 text-sm font-medium px-2 py-1 rounded-lg hover:bg-red-50"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </motion.div>
                                 ))
                             )}

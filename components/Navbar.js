@@ -42,8 +42,11 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [prevScrollPos, open]); // Re-run if scroll position or mobile menu state changes
 
-    // Hide navbar completely on auth pages and dashboard
-    if (pathname === '/login' || pathname === '/signup' || pathname === '/onboarding' || pathname === '/forgot-password' || pathname === '/forgot-username' || pathname.startsWith('/dashboard')) {
+    // FIX: Only show the navbar on specific marketing routes.
+    // This automatically hides it on /dashboard, /login, /signup, /onboarding, and /[username] (public profiles)
+    const isMarketingRoute = pathname === '/' || LINKS.some(l => pathname.startsWith(l.href));
+
+    if (!isMarketingRoute) {
         return null;
     }
 

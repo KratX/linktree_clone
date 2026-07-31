@@ -19,13 +19,11 @@ const linkSchema = z.object({
 export async function getLinksAction() {
     try {
         const session = await auth();
-        // Security: Ensure user is logged in AND has completed onboarding (has username)
         if (!session?.user?.id || !session?.user?.username) throw new Error("Not authenticated");
 
         const client = await clientPromise;
         const db = client.db();
 
-        // Data isolation: strictly query by the logged-in user's ID
         const links = await db.collection("links").find({ userId: session.user.id }).sort({ createdAt: -1 }).toArray();
         return JSON.parse(JSON.stringify(links));
     } catch (e) {
@@ -36,10 +34,8 @@ export async function getLinksAction() {
 
 export async function createLinkAction(formData) {
     const session = await auth();
-    // Security: Ensure user is logged in AND has completed onboarding
     if (!session?.user?.id || !session?.user?.username) return { error: "Please set up your username first." };
 
-    // Fix: 'await' headers() for Next.js 15+
     const headersList = await headers();
     const forwardedFor = headersList.get("x-forwarded-for");
     const ip = forwardedFor ? forwardedFor.split(',')[0] : "unknown-ip";
@@ -60,7 +56,8 @@ export async function createLinkAction(formData) {
         const newLink = {
             title: parsed.data.title,
             url: parsed.data.url,
-            userId: session.user.id, // Data isolation
+            userId: session.user.id,
+            clicks: 0, // FIX: Initialize click count at 0
             createdAt: new Date(),
         };
 
@@ -68,7 +65,6 @@ export async function createLinkAction(formData) {
 
         revalidatePath("/dashboard");
 
-        // Return the new link object to the client for instant UI update
         return { success: true, link: { ...newLink, _id: result.insertedId.toString() } };
     } catch (e) {
         console.error(e);
@@ -78,7 +74,6 @@ export async function createLinkAction(formData) {
 
 export async function deleteLinkAction(id) {
     const session = await auth();
-    // Security: Ensure user is logged in AND has completed onboarding
     if (!session?.user?.id || !session?.user?.username) return { error: "Please set up your username first." };
 
     try {
@@ -87,7 +82,7 @@ export async function deleteLinkAction(id) {
 
         await db.collection("links").deleteOne({
             _id: new ObjectId(id),
-            userId: session.user.id, // Data isolation
+            userId: session.user.id,
         });
 
         revalidatePath("/dashboard");
