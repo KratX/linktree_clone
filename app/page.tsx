@@ -56,7 +56,7 @@ export default function Home() {
 
             {/* FIX: Conditional rendering based on auth status */}
             {isLoading ? (
-              <div className="mt-10 h-[56px]"></div> // Placeholder to prevent layout shift
+              <div className="mt-10 h-14"></div> // Placeholder to prevent layout shift
             ) : isLoggedIn ? (
               <div className="mt-10 flex flex-col gap-4 sm:flex-row w-full max-w-xl">
                 <Link

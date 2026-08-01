@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react"; // FIX: Added signOut
 import { deleteLinkAction as removeLink, reorderLinksAction } from "@/actions/links";
 import { applyTemplateAction } from "@/actions/profile";
 import { AvatarRenderer } from "./Avatars";
@@ -27,9 +28,10 @@ import {
     Smartphone,
     LayoutGrid,
     Home,
+    LogOut, // FIX: Added LogOut icon
 } from "lucide-react";
 
-// FIX: Importing the split components
+// Importing the split components
 import TabButton from "./dashboard/TabButton";
 import EmptyState from "./dashboard/EmptyState";
 import LinkCard from "./dashboard/LinkCard";
@@ -190,6 +192,13 @@ export default function DashboardClient({ profile, initialLinks }) {
                         </button>
                         <button onClick={handleCopyLink} className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-black transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-black" style={{ backgroundColor: BRAND_GREEN }}>
                             <Share2 size={16} /> Share
+                        </button>
+                        {/* FIX: Added Log Out Button */}
+                        <button
+                            onClick={() => signOut({ callbackUrl: '/' })}
+                            className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        >
+                            <LogOut size={16} /> Log out
                         </button>
                     </div>
                 </div>
