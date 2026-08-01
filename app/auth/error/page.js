@@ -1,6 +1,11 @@
-export default async function AuthErrorPage({ searchParams }) {
-    const params = await searchParams;
-    const error = params.error;
+"use client"; // FIX: Added to allow onClick handlers
+
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+
+function AuthErrorContent() {
+    const searchParams = useSearchParams();
+    const error = searchParams.get("error");
 
     let errorMessage = "An unknown authentication error occurred.";
 
@@ -38,5 +43,14 @@ export default async function AuthErrorPage({ searchParams }) {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function AuthErrorPage() {
+    return (
+        // FIX: useSearchParams must be wrapped in Suspense in Next.js 15
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <AuthErrorContent />
+        </Suspense>
     );
 }

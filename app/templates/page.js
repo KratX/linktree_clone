@@ -42,7 +42,7 @@ export default function TemplatesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 pt-[168px] pb-12 px-4">
+        <div className="min-h-screen bg-gray-50 pt-42 pb-12 px-4">
             <div className="max-w-6xl mx-auto">
                 <h1 className="text-4xl font-bold text-center mb-2">Pick your vibe</h1>
                 <p className="text-gray-500 text-center mb-10">Choose a template to instantly change your profile colors.</p>
@@ -81,7 +81,7 @@ export default function TemplatesPage() {
                                 className={`flex flex-col items-center cursor-pointer ${loadingId !== null && !isLoading ? "opacity-50 pointer-events-none" : ""}`}
                             >
                                 {/* Card Preview Mockup */}
-                                <div className="relative w-full max-w-[320px] h-[580px] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-black/10 mb-5" style={previewBg}>
+                                <div className="relative w-full max-w-[320px] h-145 rounded-4xl shadow-2xl overflow-hidden flex flex-col border border-black/10 mb-5" style={previewBg}>
                                     {tpl.bgImage && (
                                         <span className="absolute top-3 left-3 z-20 text-[10px] font-semibold uppercase tracking-wide text-white/90 bg-white/15 backdrop-blur px-2 py-0.5 rounded-full">
                                             Photo
@@ -115,7 +115,7 @@ export default function TemplatesPage() {
                                         </div>
 
                                         {/* Link Buttons */}
-                                        <div className="w-full space-y-3 flex-grow">
+                                        <div className="w-full space-y-3 grow">
                                             <div className="w-full h-11 rounded-xl" style={{ backgroundColor: tpl.boxColor }}></div>
                                             <div className="w-full h-11 rounded-xl" style={{ backgroundColor: tpl.boxColor }}></div>
                                             <div className="w-full h-11 rounded-xl" style={{ backgroundColor: tpl.boxColor }}></div>

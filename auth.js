@@ -5,20 +5,14 @@ import clientPromise from "@/lib/mongodb-client";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { authConfig } from "./auth.config";
+import { emailBloom } from "@/lib/bloomFilter";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     adapter: MongoDBAdapter(clientPromise),
     session: { strategy: "jwt" },
-
-    // FIX: Explicitly define pages here so the API route uses them
-    pages: {
-        signIn: "/login",
-        error: "/auth/error",
-    },
-
     providers: [
-        ...authConfig.providers, // Google Provider
+        ...authConfig.providers,
         Credentials({
             name: "Credentials",
             credentials: {
@@ -31,7 +25,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const client = await clientPromise;
                 const db = client.db();
 
-                // FIX: Use $or to allow logging in with EITHER email OR username
                 const user = await db.collection("users").findOne({
                     $or: [
                         { email: credentials.email.toLowerCase() },
@@ -48,5 +41,59 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
         }),
     ],
-    // Callbacks are inherited from auth.config.js
+    callbacks: {
+        ...authConfig.callbacks,
+
+        async jwt({ token, user, trigger, session }) {
+            if (user) {
+                token.id = user.id;
+                if (user.username) {
+                    token.username = user.username;
+                }
+            }
+
+            if (trigger === "update" && session?.username) {
+                token.username = session.username;
+            }
+
+            return token;
+        },
+
+        async session({ session, token }) {
+            if (session.user) {
+                session.user.id = token.id;
+                if (token.username) {
+                    session.user.username = token.username;
+                }
+            }
+            return session;
+        },
+
+        // FIX: Sync Bloom Filter when Google user signs in
+        async signIn({ user, account }) {
+            if (account?.provider === "google" && user?.email) {
+                const client = await clientPromise;
+                const db = client.db();
+                const cacheCollection = db.collection("bloom_cache");
+
+                const emailCache = await cacheCollection.findOne({ _id: "emails" });
+                if (emailCache?.state) emailBloom.importState(emailCache.state);
+
+                if (!emailBloom.contains(user.email)) {
+                    emailBloom.add(user.email);
+                    await cacheCollection.updateOne(
+                        { _id: "emails" },
+                        { $set: { state: emailBloom.exportState() } },
+                        { upsert: true }
+                    );
+                }
+            }
+            return true;
+        }
+    },
+    // Explicitly define pages here so the API route uses them
+    pages: {
+        signIn: "/login",
+        error: "/auth/error",
+    },
 });

@@ -1,3 +1,4 @@
+// app/actions/userActions.js
 "use server";
 
 import { signIn, auth } from "@/auth";
@@ -82,7 +83,12 @@ export async function signupAction(formData) {
         ]);
 
     } catch (e) {
-        console.error(e);
+        // FIX: Catch MongoDB Duplicate Key Error (E11000) just in case the Bloom Filter missed it (e.g. Google OAuth user)
+        if (e.code === 11000) {
+            if (e.keyPattern?.email) return { error: "An account with this email already exists." };
+            if (e.keyPattern?.username) return { error: "This username is already taken." };
+        }
+        console.error("Signup Error:", e);
         return { error: "Server error. Please try again." };
     }
 
@@ -149,7 +155,11 @@ export async function setUsernameAction(formData) {
         return { success: true, username };
 
     } catch (e) {
-        console.error(e);
+        // FIX: Catch MongoDB Duplicate Key Error for usernames too
+        if (e.code === 11000) {
+            if (e.keyPattern?.username) return { error: "This username is already taken." };
+        }
+        console.error("Onboarding Error:", e);
         return { error: "Server error. Please try again." };
     }
 }

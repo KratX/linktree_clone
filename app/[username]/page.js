@@ -20,7 +20,6 @@ export default async function PublicProfilePage({ params }) {
         .sort({ order: 1, createdAt: 1 })
         .toArray();
 
-    // FIX: Added bgImage to the payload so the client component receives it
     const userData = {
         username: user.username,
         name: user.name || user.username,
@@ -30,9 +29,9 @@ export default async function PublicProfilePage({ params }) {
         bgColor1: user.bgColor1 || "#FFFFFF",
         bgColor2: user.bgColor2 || "#FFFFFF",
         bgDirection: user.bgDirection || "to bottom",
-        bgImage: user.bgImage || "", // <--- FIX IS HERE
+        bgImage: user.bgImage || "",
         boxColor: user.boxColor || "#000000",
-        textColor: user.textColor || "#FFFFFF",
+        textColor: user.textColor || "#000000", // FIX: Changed default to Black
         iconColor: user.iconColor || "#000000",
     };
 

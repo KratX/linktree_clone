@@ -31,7 +31,7 @@ export async function getLinksAction() {
         const db = client.db();
         const links = await db.collection("links").find({ userId: session.user.id }).sort({ order: 1, createdAt: 1 }).toArray();
         return JSON.parse(JSON.stringify(links));
-    } catch (e) {
+    } catch {
         return [];
     }
 }
@@ -81,7 +81,7 @@ export async function createLinkAction(formData) {
         const result = await db.collection("links").insertOne(newLink);
         revalidatePath("/dashboard");
         return { success: true, link: { ...newLink, _id: result.insertedId.toString() } };
-    } catch (e) {
+    } catch {
         return { error: "Failed to create link in the database.", critical: true };
     }
 }
@@ -118,7 +118,7 @@ export async function updateLinkAction(id, formData) {
         );
         revalidatePath("/dashboard");
         return { success: true, link: { ...parsed.data, _id: id } };
-    } catch (e) {
+    } catch {
         return { error: "Failed to update link in the database.", critical: true };
     }
 }
@@ -133,7 +133,7 @@ export async function deleteLinkAction(id) {
         await db.collection("links").deleteOne({ _id: new ObjectId(id), userId: session.user.id });
         revalidatePath("/dashboard");
         return { success: true, id };
-    } catch (e) {
+    } catch {
         return { error: "Failed to delete link from the database.", critical: true };
     }
 }
@@ -153,7 +153,7 @@ export async function reorderLinksAction(newOrder) {
         }));
         await db.collection("links").bulkWrite(bulkOps);
         return { success: true };
-    } catch (e) {
+    } catch {
         return { error: "Failed to reorder links in the database.", critical: true };
     }
 }

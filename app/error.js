@@ -1,4 +1,4 @@
-"use client";
+"use client"; // FIX: Must be a client component to use onClick and useEffect
 
 import { useEffect } from "react";
 
@@ -18,7 +18,6 @@ export default function Error({ error }) {
                 </p>
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                    {/* FIX: Use window.location for hard navigation to escape the error boundary */}
                     <button
                         onClick={() => window.location.href = '/'}
                         className="w-full sm:w-auto border border-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors text-center"

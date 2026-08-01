@@ -48,7 +48,7 @@ export default function PublicProfile({ user, links }) {
                     <h1 className="text-xl font-bold tracking-tight" style={{ color: user.textColor }}>
                         {user.name || user.username}
                     </h1>
-                    {user.bio && <p className="text-sm mt-1 text-center mb-4 w-full break-words" style={{ color: user.textColor }}>{user.bio}</p>}
+                    {user.bio && <p className="text-sm mt-1 text-center mb-4 w-full wrap-break-word" style={{ color: user.textColor }}>{user.bio}</p>}
                 </motion.div>
 
                 {socialLinks.length > 0 && (

@@ -26,7 +26,7 @@ export default async function DashboardPage() {
         bgDirection: userDoc?.bgDirection || "to bottom",
         bgImage: userDoc?.bgImage || "",
         boxColor: userDoc?.boxColor || "#000000",
-        textColor: userDoc?.textColor || "#FFFFFF",
+        textColor: userDoc?.textColor || "#000000", // FIX: Changed default to Black
         iconColor: userDoc?.iconColor || "#000000",
     };
 
