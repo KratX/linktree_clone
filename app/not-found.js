@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export default function NotFound() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
@@ -10,12 +8,13 @@ export default function NotFound() {
                     Sorry, we couldn&apos;t find the page or profile you&apos;re looking for.
                 </p>
                 <div className="mt-8">
-                    <Link
-                        href="/"
+                    {/* FIX: Use window.location for hard navigation */}
+                    <button
+                        onClick={() => window.location.href = '/'}
                         className="inline-block w-full bg-black text-white font-semibold py-3 px-6 rounded-xl hover:bg-gray-800 transition-colors"
                     >
                         Go back to HomePage
-                    </Link>
+                    </button>
                 </div>
             </div>
         </div>

@@ -1,13 +1,9 @@
-import Link from "next/link";
-
 export default async function AuthErrorPage({ searchParams }) {
-    // Next.js 15 Fix: searchParams is now a Promise
     const params = await searchParams;
     const error = params.error;
 
     let errorMessage = "An unknown authentication error occurred.";
 
-    // Map NextAuth error codes to user-friendly messages
     if (error === "AccessDenied" || error === "OAuthCallbackError") {
         errorMessage = "You cancelled the Google sign-in, or access was denied. Please try again.";
     } else if (error === "Configuration") {
@@ -27,18 +23,18 @@ export default async function AuthErrorPage({ searchParams }) {
                 </p>
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link
-                        href="/login"
+                    <button
+                        onClick={() => window.location.href = '/login'}
                         className="w-full sm:w-auto bg-black text-white font-semibold py-3 px-6 rounded-xl hover:bg-gray-800 transition-colors text-center"
                     >
                         Back to Login
-                    </Link>
-                    <Link
-                        href="/"
+                    </button>
+                    <button
+                        onClick={() => window.location.href = '/'}
                         className="w-full sm:w-auto border border-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors text-center"
                     >
                         Go back to HomePage
-                    </Link>
+                    </button>
                 </div>
             </div>
         </div>

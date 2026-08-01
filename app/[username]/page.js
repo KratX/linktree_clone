@@ -4,33 +4,28 @@ import { notFound } from "next/navigation";
 import PublicProfile from "@/components/PublicProfile";
 
 export default async function PublicProfilePage({ params }) {
-    // Next.js 15 Fix: params is now a Promise
     const { username } = await params;
-
     const client = await clientPromise;
     const db = client.db();
-
-    // Find user by username
     const user = await db.collection("users").findOne({ username });
 
-    if (!user) {
-        notFound(); // Shows 404 page if user doesn't exist
-    }
+    if (!user) notFound();
 
-    // Fetch their links
-    const links = await db.collection("links")
-        .find({ userId: user._id.toString() })
-        .sort({ createdAt: -1 })
-        .toArray();
+    const links = await db.collection("links").find({ userId: user._id.toString() }).sort({ order: 1, createdAt: 1 }).toArray();
 
-    // Prepare serializable object for the Client Component
     const userData = {
         username: user.username,
-        name: user.name || user.username
+        name: user.name || user.username,
+        bio: user.bio || "",
+        avatar: user.avatar || "",
+        isGradient: user.isGradient || false,
+        bgColor1: user.bgColor1 || "#FFFFFF",
+        bgColor2: user.bgColor2 || "#FFFFFF",
+        bgDirection: user.bgDirection || "to bottom",
+        boxColor: user.boxColor || "#000000",
+        textColor: user.textColor || "#FFFFFF",
+        iconColor: user.iconColor || "#000000",
     };
 
-    // MongoDB ObjectId is not serializable, so we stringify and parse it
-    const linksData = JSON.parse(JSON.stringify(links));
-
-    return <PublicProfile user={userData} links={linksData} />;
+    return <PublicProfile user={userData} links={JSON.parse(JSON.stringify(links))} />;
 }

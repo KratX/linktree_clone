@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 
 export default function Error({ error }) {
     useEffect(() => {
-        // Log the error to an error reporting service (or console)
         console.error(error);
     }, [error]);
 
@@ -20,12 +18,13 @@ export default function Error({ error }) {
                 </p>
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link
-                        href="/"
+                    {/* FIX: Use window.location for hard navigation to escape the error boundary */}
+                    <button
+                        onClick={() => window.location.href = '/'}
                         className="w-full sm:w-auto border border-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-colors text-center"
                     >
                         Go back to HomePage
-                    </Link>
+                    </button>
                 </div>
             </div>
         </div>
