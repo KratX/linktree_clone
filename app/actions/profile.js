@@ -12,12 +12,13 @@ const profileSchema = z.object({
     bio: z.string().max(160, "Bio must be at most 160 characters").optional(),
     avatar: z.string().optional(),
     isGradient: z.boolean().optional(),
-    bgColor1: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/),
-    bgColor2: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/),
+    bgColor1: z.string().optional(),
+    bgColor2: z.string().optional(),
     bgDirection: z.string().optional(),
-    boxColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/),
-    textColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/),
-    iconColor: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/),
+    bgImage: z.string().url().optional().or(z.literal("")).or(z.null()),
+    boxColor: z.string().optional(),
+    textColor: z.string().optional(),
+    iconColor: z.string().optional(),
 });
 
 export async function updateProfileAction(formData) {
@@ -32,6 +33,7 @@ export async function updateProfileAction(formData) {
         bgColor1: formData.get("bgColor1") || "#FFFFFF",
         bgColor2: formData.get("bgColor2") || "#FFFFFF",
         bgDirection: formData.get("bgDirection") || "to bottom",
+        bgImage: formData.get("bgImage") || null,
         boxColor: formData.get("boxColor") || "#000000",
         textColor: formData.get("textColor") || "#FFFFFF",
         iconColor: formData.get("iconColor") || "#000000",
@@ -57,9 +59,9 @@ export async function updateProfileAction(formData) {
 export async function applyTemplateAction(templateColors) {
     const session = await auth();
 
-    // FIX: Return a redirect instruction instead of throwing the Next.js redirect error.
+    // FIX: Return critical error and redirect instruction
     if (!session?.user?.id) {
-        return { redirect: "/signup" };
+        return { error: "Your session has expired. Please log in again.", critical: true, redirect: "/signup" };
     }
 
     try {

@@ -3,7 +3,9 @@
 
 import { useState, useEffect, useRef, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { deleteLinkAction as removeLink, reorderLinksAction } from "@/actions/links";
+import { applyTemplateAction } from "@/actions/profile";
 import { AvatarRenderer } from "./Avatars";
 import { PlatformIcon } from "./SocialIcons";
 import SocialLinkModal from "./SocialLinkModal";
@@ -13,6 +15,8 @@ import ProfileModal from "./ProfileModal";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { TEMPLATES, CATEGORIES } from "@/data/template-set";
+import { motion } from "framer-motion";
 import {
     Plus,
     Link2,
@@ -29,12 +33,13 @@ import {
     X,
     Smartphone,
     ChevronRight,
+    LayoutGrid,
 } from "lucide-react";
 
-// Linktree's signature brand green — used sparingly, as an accent only.
 const BRAND_GREEN = "#43E660";
 
 export default function DashboardClient({ profile, initialLinks }) {
+    const router = useRouter();
     const [links, setLinks] = useState(initialLinks);
     const [p, setP] = useState(profile);
     const [activeModal, setActiveModal] = useState(null);
@@ -46,6 +51,8 @@ export default function DashboardClient({ profile, initialLinks }) {
     const [copied, setCopied] = useState(false);
     const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
     const addMenuRef = useRef(null);
+
+    const [templateCategory, setTemplateCategory] = useState("All");
 
     const [throwableError, setThrowableError] = useState(null);
     if (throwableError) throw throwableError;
@@ -65,9 +72,11 @@ export default function DashboardClient({ profile, initialLinks }) {
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
-    const bgStyle = p.isGradient
-        ? { backgroundImage: `linear-gradient(${p.bgDirection}, ${p.bgColor1}, ${p.bgColor2})` }
-        : { backgroundColor: p.bgColor1 };
+    const bgStyle = p.bgImage
+        ? { backgroundImage: `url(${p.bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : p.isGradient
+            ? { backgroundImage: `linear-gradient(${p.bgDirection}, ${p.bgColor1}, ${p.bgColor2})` }
+            : { backgroundColor: p.bgColor1 };
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
@@ -95,7 +104,42 @@ export default function DashboardClient({ profile, initialLinks }) {
             const result = await removeLink(id);
             if (result?.error) {
                 setLinks(previousLinks);
-                setThrowableError(new Error(result.error));
+                if (result.critical) setThrowableError(new Error(result.error));
+            }
+        });
+    };
+
+    const handleApplyTemplate = (template) => {
+        const oldProfile = p; // Save current state in case we need to revert
+        const newProfile = {
+            ...p,
+            bgColor1: template.bgColor || "#0f172a",
+            bgImage: template.bgImage || null,
+            boxColor: template.boxColor,
+            textColor: template.textColor,
+            iconColor: template.iconColor,
+            isGradient: false
+        };
+
+        setP(newProfile); // Optimistic UI update
+
+        startTransition(async () => {
+            const result = await applyTemplateAction({
+                bgColor1: template.bgColor || "#0f172a",
+                bgImage: template.bgImage || null,
+                boxColor: template.boxColor,
+                textColor: template.textColor,
+                iconColor: template.iconColor,
+                isGradient: false,
+            });
+
+            if (result?.error) {
+                setP(oldProfile); // Revert UI on failure
+                if (result.critical) {
+                    setThrowableError(new Error(result.error)); // Trigger error boundary
+                }
+            } else if (result?.redirect) {
+                router.push(result.redirect);
             }
         });
     };
@@ -116,6 +160,8 @@ export default function DashboardClient({ profile, initialLinks }) {
             // clipboard permission denied
         }
     };
+
+    const filteredTemplates = templateCategory === "All" ? TEMPLATES : TEMPLATES.filter((t) => t.category === templateCategory);
 
     return (
         <div className="min-h-screen w-full bg-[#F7F7F5] overflow-x-hidden">
@@ -140,7 +186,7 @@ export default function DashboardClient({ profile, initialLinks }) {
             <ProfileModal isOpen={activeModal === "profile"} onClose={() => setActiveModal(null)} p={p} setP={setP} />
 
             {/* Top bar */}
-            <header className="sticky top-0 z-30 border-b border-black/6 bg-white/80 backdrop-blur-md">
+            <header className="sticky top-0 z-30 border-b border-black/[0.06] bg-white/80 backdrop-blur-md">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center shrink-0">
@@ -156,7 +202,7 @@ export default function DashboardClient({ profile, initialLinks }) {
                             onClick={handleCopyLink}
                             className="group flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:border-gray-300 transition-colors min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/10"
                         >
-                            <span className="truncate max-w-37.5 sm:max-w-xs">yoursite.link/{p.username}</span>
+                            <span className="truncate max-w-[150px] sm:max-w-xs">yoursite.link/{p.username}</span>
                             {copied ? (
                                 <Check size={14} className="text-[#0F9D3E] shrink-0" />
                             ) : (
@@ -204,6 +250,12 @@ export default function DashboardClient({ profile, initialLinks }) {
                             onClick={() => setTab("appearance")}
                             icon={<Palette size={16} />}
                             label="Appearance"
+                        />
+                        <TabButton
+                            active={tab === "templates"}
+                            onClick={() => setTab("templates")}
+                            icon={<LayoutGrid size={16} />}
+                            label="Templates"
                         />
                     </div>
 
@@ -283,8 +335,58 @@ export default function DashboardClient({ profile, initialLinks }) {
                                 )}
                             </div>
                         </>
-                    ) : (
+                    ) : tab === "appearance" ? (
                         <AppearanceTab p={p} onEditProfile={() => openModal("profile")} onEditColors={() => openModal("colors")} />
+                    ) : (
+                        /* Templates Tab UI */
+                        <div className="flex gap-6 mt-2">
+                            {/* Sidebar */}
+                            <div className="w-32 shrink-0 space-y-1">
+                                {CATEGORIES.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setTemplateCategory(cat)}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${templateCategory === cat ? "bg-gray-900 text-white" : "text-gray-500 hover:bg-gray-100"}`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Template Grid */}
+                            <div className="flex-1 grid grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2">
+                                {filteredTemplates.map(tpl => {
+                                    const previewBg = tpl.bgImage
+                                        ? { backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url(${tpl.bgImage}?q=80&w=400&auto=format&fit=crop)`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                                        : { backgroundColor: tpl.bgColor };
+
+                                    return (
+                                        <motion.div
+                                            key={tpl.id}
+                                            onClick={() => handleApplyTemplate(tpl)}
+                                            whileHover={{ scale: 1.05, y: -4 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                                            className="cursor-pointer"
+                                        >
+                                            <div
+                                                className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden border border-black/5 shadow-sm flex flex-col items-center justify-center p-3"
+                                                style={previewBg}
+                                            >
+                                                <div className="w-8 h-8 rounded-full mb-2 flex items-center justify-center" style={{ backgroundColor: tpl.iconColor + '33' }}>
+                                                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: tpl.iconColor }}></div>
+                                                </div>
+                                                <div className="w-3/4 h-1.5 rounded-full mb-1" style={{ backgroundColor: tpl.textColor, opacity: 0.9 }}></div>
+                                                <div className="w-1/2 h-1.5 rounded-full mb-3" style={{ backgroundColor: tpl.textColor, opacity: 0.6 }}></div>
+                                                <div className="w-full h-3.5 rounded-lg mb-1.5" style={{ backgroundColor: tpl.boxColor }}></div>
+                                                <div className="w-full h-3.5 rounded-lg" style={{ backgroundColor: tpl.boxColor }}></div>
+                                            </div>
+                                            <p className="text-xs text-center text-gray-600 mt-1.5 truncate font-medium">{tpl.name}</p>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        </div>
                     )}
                 </div>
 
@@ -302,7 +404,7 @@ export default function DashboardClient({ profile, initialLinks }) {
                     className="fixed inset-0 z-50 lg:hidden bg-black/60 flex items-center justify-center p-6 overflow-y-auto"
                     onClick={() => setMobilePreviewOpen(false)}
                 >
-                    <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-85 mx-auto">
+                    <div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-[340px] mx-auto">
                         <button
                             onClick={() => setMobilePreviewOpen(false)}
                             aria-label="Close preview"
@@ -410,6 +512,12 @@ function LinkCard({ link, onDelete, onEdit }) {
 }
 
 function AppearanceTab({ p, onEditProfile, onEditColors }) {
+    const previewStyle = p.bgImage
+        ? { backgroundImage: `url(${p.bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : p.isGradient
+            ? { backgroundImage: `linear-gradient(${p.bgDirection}, ${p.bgColor1}, ${p.bgColor2})` }
+            : { backgroundColor: p.bgColor1 };
+
     return (
         <div className="space-y-4">
             <SettingRow icon={<User size={18} />} title="Profile" description="Name, bio, and avatar" onClick={onEditProfile} />
@@ -418,16 +526,7 @@ function AppearanceTab({ p, onEditProfile, onEditColors }) {
                 title="Colours & theme"
                 description="Background, buttons, and text colours"
                 onClick={onEditColors}
-                preview={
-                    <div
-                        className="w-16 h-8 rounded-lg border border-black/5 shrink-0"
-                        style={
-                            p.isGradient
-                                ? { backgroundImage: `linear-gradient(${p.bgDirection}, ${p.bgColor1}, ${p.bgColor2})` }
-                                : { backgroundColor: p.bgColor1 }
-                        }
-                    />
-                }
+                preview={<div className="w-16 h-8 rounded-lg border border-black/5 shrink-0" style={previewStyle} />}
             />
         </div>
     );
@@ -450,10 +549,9 @@ function SettingRow({ icon, title, description, onClick, preview }) {
     );
 }
 
-// Replaced PhonePreview with CardPreview
 function CardPreview({ p, links, bgStyle }) {
     return (
-        <div className="flex flex-col items-center w-full max-w-85 mx-auto">
+        <div className="flex flex-col items-center w-full max-w-[340px] mx-auto">
             <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
                 <span className="relative flex h-2 w-2">
                     <span
@@ -465,10 +563,8 @@ function CardPreview({ p, links, bgStyle }) {
                 Live preview
             </div>
 
-            {/* The Card Container - Made taller and ensured no horizontal overflow */}
-            <div className="relative w-full h-170 rounded-4xl shadow-2xl overflow-hidden flex flex-col border border-black/10" style={bgStyle}>
+            <div className="relative w-full h-[680px] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-black/10" style={bgStyle}>
                 <div className="h-full overflow-y-auto overflow-x-hidden p-8 flex flex-col items-center">
-                    {/* Avatar */}
                     <div className="w-20 h-20 rounded-full bg-gray-200/50 backdrop-blur flex items-center justify-center mb-4 overflow-hidden shrink-0">
                         {p.avatar ? (
                             <div className="w-full h-full p-4" style={{ color: p.iconColor }}>
@@ -479,17 +575,15 @@ function CardPreview({ p, links, bgStyle }) {
                         )}
                     </div>
 
-                    {/* Name & Bio */}
-                    <h3 className="font-bold text-lg text-center wrap-break-word w-full" style={{ color: p.textColor }}>
+                    <h3 className="font-bold text-lg text-center break-words w-full" style={{ color: p.textColor }}>
                         {p.name}
                     </h3>
                     {p.bio && (
-                        <p className="text-sm mb-5 text-center w-full wrap-break-word" style={{ color: p.textColor }}>
+                        <p className="text-sm mb-5 text-center w-full break-words" style={{ color: p.textColor }}>
                             {p.bio}
                         </p>
                     )}
 
-                    {/* Social Icons */}
                     <div className="flex flex-wrap justify-center gap-3 mb-6 max-w-full">
                         {links
                             .filter((l) => l.type === "social")
@@ -500,14 +594,13 @@ function CardPreview({ p, links, bgStyle }) {
                             ))}
                     </div>
 
-                    {/* Text Links */}
-                    <div className="w-full space-y-3 grow">
+                    <div className="w-full space-y-3 flex-grow">
                         {links
                             .filter((l) => l.type === "text" || !l.type)
                             .map((link) => (
                                 <div
                                     key={link._id}
-                                    className="w-full py-3 text-center font-medium text-sm rounded-xl shadow-sm wrap-break-word"
+                                    className="w-full py-3 text-center font-medium text-sm rounded-xl shadow-sm break-words"
                                     style={{ backgroundColor: p.boxColor, color: p.textColor }}
                                 >
                                     {link.title || "Untitled"}
@@ -515,10 +608,9 @@ function CardPreview({ p, links, bgStyle }) {
                             ))}
                     </div>
 
-                    {/* Footer Join Button */}
                     <div className="mt-8 w-full flex justify-center px-4">
                         <div
-                            className="px-5 py-2 rounded-full text-xs font-semibold border max-w-full text-center wrap-break-word"
+                            className="px-5 py-2 rounded-full text-xs font-semibold border max-w-full text-center break-words"
                             style={{
                                 color: p.textColor,
                                 borderColor: p.textColor + '40',

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getLinksAction } from "@/actions/links";
 import clientPromise from "@/lib/mongodb-client";
-import { ObjectId } from "mongodb"; // FIX: Import ObjectId
+import { ObjectId } from "mongodb";
 import DashboardClient from "@/components/DashboardClient";
 
 export default async function DashboardPage() {
@@ -12,8 +12,6 @@ export default async function DashboardPage() {
 
     const client = await clientPromise;
     const db = client.db();
-
-    // FIX: Cast session.user.id (string) to ObjectId so MongoDB can find the document
     const userDoc = await db.collection("users").findOne({ _id: new ObjectId(session.user.id) });
 
     const profile = {
@@ -26,12 +24,12 @@ export default async function DashboardPage() {
         bgColor1: userDoc?.bgColor1 || "#FFFFFF",
         bgColor2: userDoc?.bgColor2 || "#FFFFFF",
         bgDirection: userDoc?.bgDirection || "to bottom",
+        bgImage: userDoc?.bgImage || "",
         boxColor: userDoc?.boxColor || "#000000",
         textColor: userDoc?.textColor || "#FFFFFF",
         iconColor: userDoc?.iconColor || "#000000",
     };
 
     const links = await getLinksAction();
-
     return <DashboardClient profile={profile} initialLinks={links} />;
 }

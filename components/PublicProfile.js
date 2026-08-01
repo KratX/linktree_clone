@@ -17,9 +17,11 @@ export default function PublicProfile({ user, links }) {
         visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } },
     };
 
-    const bgStyle = user.isGradient
-        ? { backgroundImage: `linear-gradient(${user.bgDirection}, ${user.bgColor1}, ${user.bgColor2})` }
-        : { backgroundColor: user.bgColor1 || '#FFFFFF' };
+    const bgStyle = user.bgImage
+        ? { backgroundImage: `url(${user.bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : user.isGradient
+            ? { backgroundImage: `linear-gradient(${user.bgDirection}, ${user.bgColor1}, ${user.bgColor2})` }
+            : { backgroundColor: user.bgColor1 || '#FFFFFF' };
 
     const textLinks = links.filter(l => l.type === 'text' || !l.type);
     const socialLinks = links.filter(l => l.type === 'social');
@@ -33,7 +35,6 @@ export default function PublicProfile({ user, links }) {
                 initial="hidden"
                 animate="visible"
             >
-                {/* Profile Header */}
                 <motion.div variants={itemVariants} className="flex flex-col items-center mb-8 w-full">
                     <div className="w-24 h-24 rounded-full bg-gray-200/50 backdrop-blur flex items-center justify-center mb-4 overflow-hidden">
                         {user.avatar ? (
@@ -47,11 +48,9 @@ export default function PublicProfile({ user, links }) {
                     <h1 className="text-xl font-bold tracking-tight" style={{ color: user.textColor }}>
                         {user.name || user.username}
                     </h1>
-                    {/* FIX: Added w-full and break-words so bio text wraps correctly */}
-                    {user.bio && <p className="text-sm mt-1 text-center mb-4 w-full wrap-break-word" style={{ color: user.textColor }}>{user.bio}</p>}
+                    {user.bio && <p className="text-sm mt-1 text-center mb-4 w-full break-words" style={{ color: user.textColor }}>{user.bio}</p>}
                 </motion.div>
 
-                {/* Social Icons */}
                 {socialLinks.length > 0 && (
                     <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-4 mb-8">
                         {socialLinks.map((link) => {
@@ -71,7 +70,6 @@ export default function PublicProfile({ user, links }) {
                     </motion.div>
                 )}
 
-                {/* Text Links */}
                 <div className="w-full space-y-3">
                     {textLinks.map((link) => (
                         <motion.a
@@ -90,7 +88,6 @@ export default function PublicProfile({ user, links }) {
                     ))}
                 </div>
 
-                {/* Footer */}
                 <motion.div variants={itemVariants} className="mt-16">
                     <Link href="/" className="text-gray-400 text-xs hover:text-gray-600 transition-colors font-medium tracking-wider uppercase">
                         Powered by Linktree
