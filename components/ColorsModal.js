@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { updateProfileAction } from "@/actions/profile";
+import toast from "react-hot-toast"; // FIX: Import toast
 
 export default function ColorsModal({ isOpen, onClose, p, setP }) {
     const [error, setError] = useState("");
@@ -30,6 +31,8 @@ export default function ColorsModal({ isOpen, onClose, p, setP }) {
                 setError(result.error);
             }
         } else {
+            // FIX: Show success toast before closing
+            toast.success("Saved Successfully");
             onClose();
         }
     };
@@ -41,7 +44,6 @@ export default function ColorsModal({ isOpen, onClose, p, setP }) {
                     <h3 className="text-xl font-bold mb-4">Customize Colors</h3>
                     {error && <div className="bg-red-50 text-red-600 text-sm p-2 rounded mb-4">{error}</div>}
                     <form onSubmit={handleSave} className="space-y-4">
-
                         <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                             <span className="text-sm font-medium text-gray-700">Use Gradient</span>
                             <button

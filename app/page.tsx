@@ -107,40 +107,40 @@ export default function Home() {
         </div>
       </section>
 
-      <section
-        id="features"
-        className="bg-white px-6 py-24 md:px-10 lg:px-16 min-h-screen"
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-                What Linktree does
-              </p>
-              <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">
-                One home for everything you create, curate, and sell.
-              </h2>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
-                Connect your audience to your latest content, your store, your
-                calendar, and your social channels with a single shareable URL.
-              </p>
+      <section className="min-h-screen bg-[#0a5cfa] flex items-center justify-center px-6 md:px-10 lg:px-16 py-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left Side: Image / Profile Card Placeholder */}
+          <div className="relative w-full h-[400px] lg:h-[550px] rounded-[2rem] flex items-center justify-center border border-blue-400/30 bg-gradient-to-br from-blue-500/30 to-blue-700/30 overflow-hidden order-2 lg:order-1 shadow-2xl">
+            {/* Placeholder styling mimicking a Linktree profile card */}
+            <div className="w-64 h-80 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl flex flex-col items-center justify-center p-6 transform rotate-[-4deg] transition-transform hover:rotate-0 duration-500">
+              <div className="w-24 h-24 bg-gray-200 rounded-full mb-4 flex items-center justify-center text-gray-400 font-bold text-2xl">
+                BB
+              </div>
+              <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 w-24 bg-gray-100 rounded mb-6"></div>
+              <div className="w-full h-10 bg-blue-50 rounded-xl mb-2"></div>
+              <div className="w-full h-10 bg-blue-50 rounded-xl mb-2"></div>
+              <div className="w-full h-10 bg-blue-50 rounded-xl"></div>
             </div>
+            <span className="absolute bottom-4 right-4 text-blue-200/50 text-xs font-medium uppercase tracking-wider">
+              Image Placeholder
+            </span>
+          </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              {features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="rounded-3xl border border-slate-200 bg-slate-50 p-6"
-                >
-                  <h3 className="text-xl font-semibold text-slate-900">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    {feature.description}
-                  </p>
-                </div>
-              ))}
-            </div>
+          {/* Right Side: Text Content */}
+          <div className="max-w-xl order-1 lg:order-2">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-yellow-400 leading-[1.05] tracking-tight">
+              Create and customize your Linktree in minutes
+            </h1>
+            <p className="mt-8 text-lg lg:text-xl text-blue-50 leading-relaxed font-medium">
+              Bring all your social platforms, latest content, and storefronts
+              together in one place. Make it uniquely yours with custom colors,
+              templates, and layouts.
+            </p>
+
+            <button className="mt-10 inline-flex items-center justify-center bg-yellow-400 text-[#0a5cfa] font-bold px-8 py-4 rounded-full hover:bg-yellow-300 transition-all text-lg shadow-xl shadow-blue-900/30 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-yellow-300/50">
+              Get started for free
+            </button>
           </div>
         </div>
       </section>

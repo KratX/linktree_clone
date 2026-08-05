@@ -137,7 +137,7 @@ const Navbar = () => {
                                 <>
                                     <Link
                                         href="/dashboard"
-                                        className="text-sm font-medium text-gray-700 hover:text-black transition-colors duration-300 hover:-translate-y-0.5 transform inline-block"
+                                        className="text-sm font-medium p-4 border border-black/20 bg-black rounded-full text-white duration-300 hover:-translate-y-0.5 transform inline-block transition hover:bg-slate-800 whitespace-nowrap w-full sm:w-auto"
                                     >
                                         Dashboard
                                     </Link>
@@ -147,7 +147,7 @@ const Navbar = () => {
                                     >
                                         <button
                                             onClick={() => signOut({ callbackUrl: '/' })}
-                                            className="inline-flex items-center px-5 py-2 bg-gray-100 text-black text-sm font-semibold rounded-full hover:bg-gray-200 hover:shadow-md transition-all duration-300 shadow-sm"
+                                            className="inline-flex cursor-pointer items-center px-5 py-2 bg-gray-100 text-black text-sm font-semibold rounded-full hover:bg-gray-200 hover:shadow-md transition-all duration-300 shadow-sm"
                                         >
                                             Log out
                                         </button>

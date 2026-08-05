@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { updateProfileAction } from "@/actions/profile";
 import { AVATARS, AvatarRenderer } from "./Avatars";
+import toast from "react-hot-toast"; // FIX: Import toast
 
 export default function ProfileModal({ isOpen, onClose, p, setP }) {
     const [error, setError] = useState("");
@@ -27,6 +28,8 @@ export default function ProfileModal({ isOpen, onClose, p, setP }) {
                 setError(result.error);
             }
         } else {
+            // FIX: Show success toast before closing
+            toast.success("Saved Successfully");
             onClose();
         }
     };

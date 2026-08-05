@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createLinkAction, updateLinkAction } from "@/actions/links";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast"; // FIX: Import toast
 
 export default function TextLinkModal({ isOpen, onClose, existingLink, onAdd, onUpdate }) {
     const [title, setTitle] = useState(existingLink?.title || "");
@@ -36,6 +37,12 @@ export default function TextLinkModal({ isOpen, onClose, existingLink, onAdd, on
                 setError(result.error);
             }
         } else {
+            // FIX: Show toast based on whether it was an add or an update
+            if (existingLink?._id) {
+                toast.success("Link Updated");
+            } else {
+                toast.success("Link Added");
+            }
             onClose();
         }
     };

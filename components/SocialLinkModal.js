@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PLATFORMS } from "./SocialIcons";
 import { createLinkAction, updateLinkAction } from "@/actions/links";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast"; // FIX: Import toast
 
 export default function SocialLinkModal({ isOpen, onClose, existingLink, onAdd, onUpdate }) {
     const [selectedPlatform, setSelectedPlatform] = useState(existingLink?.platform || "");
@@ -34,13 +35,18 @@ export default function SocialLinkModal({ isOpen, onClose, existingLink, onAdd, 
         }
 
         if (result?.error) {
-            // FIX: Only throw to error boundary if it's a critical error (like auth failure)
             if (result.critical) {
                 setThrowableError(new Error(result.error));
             } else {
-                setError(result.error); // Otherwise, show normal text warning
+                setError(result.error);
             }
         } else {
+            // FIX: Show toast based on whether it was an add or an update
+            if (existingLink?._id) {
+                toast.success("Link Updated");
+            } else {
+                toast.success("Link Added");
+            }
             onClose();
         }
     };
