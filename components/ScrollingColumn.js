@@ -1,110 +1,62 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 
-function PlaceholderCard({ variant }) {
-  return (
-    <div className="group relative h-72 w-44 overflow-hidden rounded-4xl border border-white/40 bg-white/70 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.18)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02]">
-      {variant === 0 && (
-        <>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-slate-200 animate-pulse" />
+// Mock creator profiles used to build the illusion of a living product,
+// without relying on real photos or real people.
+const PROFILES = [
+    { initials: "MJ", name: "Maren J.", handle: "@marenmakes", accent: "#FF6B6B" },
+    { initials: "KO", name: "Kofi O.", handle: "@kofisounds", accent: "#4D96FF" },
+    { initials: "PL", name: "Priya L.", handle: "@priyapaints", accent: "#FFB84D" },
+    { initials: "DS", name: "Dana S.", handle: "@danastudio", accent: "#7C5CFC" },
+    { initials: "RT", name: "Remi T.", handle: "@remi.reads", accent: "#2ED3A4" },
+    { initials: "AV", name: "Ana V.", handle: "@anavo", accent: "#FF7AB6" },
+];
 
-            <div className="flex-1 space-y-2">
-              <div className="h-3 w-20 rounded-full bg-slate-200 animate-pulse" />
-              <div className="h-2 w-14 rounded-full bg-slate-100 animate-pulse" />
+function ProfileCard({ profile }) {
+    return (
+        <div className="w-full rounded-2xl bg-white shadow-lg shadow-black/5 border border-black/5 p-4 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+                <div
+                    className="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                    style={{ backgroundColor: profile.accent }}
+                >
+                    {profile.initials}
+                </div>
+                <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{profile.name}</p>
+                    <p className="text-xs text-slate-400 truncate">{profile.handle}</p>
+                </div>
             </div>
-          </div>
-
-          <div className="mt-5 h-32 rounded-2xl bg-linear-to-br from-slate-300 via-slate-100 to-slate-200 animate-pulse" />
-
-          <div className="mt-5 space-y-3">
-            <div className="h-3 rounded-full bg-slate-200 animate-pulse" />
-            <div className="h-3 w-4/5 rounded-full bg-slate-200 animate-pulse" />
-            <div className="h-3 w-2/3 rounded-full bg-slate-200 animate-pulse" />
-          </div>
-
-          <div className="absolute bottom-4 left-4 right-4 flex gap-2">
-            <div className="h-10 flex-1 rounded-full bg-slate-900" />
-            <div className="h-10 w-10 rounded-full bg-slate-300" />
-          </div>
-        </>
-      )}
-
-      {variant === 1 && (
-        <>
-          <div className="h-12 rounded-2xl bg-slate-200 animate-pulse" />
-
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <div className="aspect-square rounded-2xl bg-slate-200 animate-pulse" />
-            <div className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
-            <div className="aspect-square rounded-2xl bg-slate-100 animate-pulse" />
-            <div className="aspect-square rounded-2xl bg-slate-200 animate-pulse" />
-          </div>
-
-          <div className="mt-5 space-y-3">
-            <div className="h-3 rounded-full bg-slate-200 animate-pulse" />
-            <div className="h-3 w-5/6 rounded-full bg-slate-200 animate-pulse" />
-            <div className="h-3 w-2/3 rounded-full bg-slate-200 animate-pulse" />
-          </div>
-
-          <div className="mt-6 flex gap-2">
-            <div className="h-10 flex-1 rounded-full bg-slate-900" />
-            <div className="h-10 w-10 rounded-full bg-slate-300" />
-          </div>
-        </>
-      )}
-
-      {variant === 2 && (
-        <>
-          <div className="h-28 rounded-3xl bg-linear-to-br from-violet-200 via-white to-cyan-200 animate-pulse" />
-
-          <div className="mt-5 flex gap-2">
-            <div className="h-8 flex-1 rounded-xl bg-slate-200 animate-pulse" />
-            <div className="h-8 w-8 rounded-full bg-slate-300 animate-pulse" />
-          </div>
-
-          <div className="mt-5 space-y-3">
-            <div className="h-3 rounded-full bg-slate-200 animate-pulse" />
-            <div className="h-3 w-3/4 rounded-full bg-slate-200 animate-pulse" />
-            <div className="h-3 w-1/2 rounded-full bg-slate-200 animate-pulse" />
-            <div className="h-3 w-5/6 rounded-full bg-slate-200 animate-pulse" />
-          </div>
-
-          <div className="absolute bottom-4 left-4 right-4 h-10 rounded-full bg-slate-900" />
-        </>
-      )}
-    </div>
-  );
+            <div className="flex flex-col gap-2">
+                <div className="h-8 rounded-lg bg-slate-100 w-full" />
+                <div className="h-8 rounded-lg bg-slate-100 w-full" />
+                <div
+                    className="h-8 rounded-lg w-full opacity-90"
+                    style={{ backgroundColor: profile.accent }}
+                />
+            </div>
+        </div>
+    );
 }
 
-const cards = Array.from({ length: 8 });
+export default function ScrollingColumn({ duration = 30, reverse = false, offset = false }) {
+    // Duplicate the list so the loop can reset seamlessly at -50%.
+    const doubled = [...PROFILES, ...PROFILES];
 
-export default function ScrollingColumn({
-  reverse = false,
-  duration = 24,
-  offset = false,
-}) {
-  return (
-    <div
-      className={`relative h-180 overflow-hidden ${offset ? "mt-24" : ""}`}
-    >
-      <motion.div
-        className="flex flex-col gap-5"
-        animate={{
-          y: reverse ? ["-50%", "0%"] : ["0%", "-50%"],
-        }}
-        transition={{
-          duration,
-          ease: "linear",
-          repeat: Infinity,
-          repeatType: "loop",
-        }}
-      >
-        {[...cards, ...cards].map((_, index) => (
-          <PlaceholderCard key={index} variant={index % 3} />
-        ))}
-      </motion.div>
-    </div>
-  );
+    return (
+        <div className="relative h-full w-44 overflow-hidden">
+            <motion.div
+                className="flex flex-col gap-5"
+                style={{ marginTop: offset ? "-140px" : 0 }}
+                animate={{ y: reverse ? ["-50%", "0%"] : ["0%", "-50%"] }}
+                transition={{ duration, repeat: Infinity, ease: "linear" }}
+            >
+                {doubled.map((profile, i) => (
+                    <ProfileCard key={`${profile.handle}-${i}`} profile={profile} />
+                ))}
+            </motion.div>
+        </div>
+    );
 }

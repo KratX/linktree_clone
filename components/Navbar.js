@@ -11,11 +11,9 @@ const LINKS = [
     { label: 'Products', href: '/products' },
     { label: 'Templates', href: '/templates' },
     { label: 'Marketplace', href: '/marketplace' },
-    { label: 'Learn', href: '/learn' },
     { label: 'Pricing', href: '/pricing' },
 ];
 
-// Animation variants for the mobile menu stagger effect
 const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -32,7 +30,6 @@ const itemVariants = {
     show: { opacity: 1, y: 0 }
 };
 
-// FIX: Spring physics for buttons to make them feel tactile
 const buttonHoverSpring = {
     scale: 1.05,
     y: -2,
@@ -80,39 +77,38 @@ const Navbar = () => {
                 opacity: visible ? 1 : 0
             }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-white fixed top-10 w-[90vw] md:w-[80vw] right-[5vw] md:right-[10vw] z-50 rounded-3xl p-3 shadow-xl shadow-black/5 border border-black/5 backdrop-blur-xl"
+            className="bg-white fixed top-6 w-[92vw] md:w-[80vw] right-[4vw] md:right-[10vw] z-50 rounded-3xl p-2.5 shadow-xl shadow-black/5 border border-black/5 backdrop-blur-xl"
         >
-            <nav className="px-4 sm:px-6 lg:px-8">
-                <div className="flex h-14 items-center justify-between">
+            <nav className="px-3 sm:px-5 lg:px-6">
+                <div className="flex h-12 items-center justify-between">
 
                     {/* Left Side: Logo & Desktop Links */}
-                    <div className="flex items-center gap-8 lg:gap-14">
+                    <div className="flex items-center gap-8 lg:gap-12">
                         <motion.div
-                            whileHover={{ scale: 1.1, rotate: -5 }}
+                            whileHover={{ scale: 1.08, rotate: -4 }}
                             whileTap={{ scale: 0.95 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
                         >
                             <Link href="/" className="flex items-center gap-2">
                                 <Image
-                                    alt="LinkTree logo"
+                                    alt="Linktree logo"
                                     src="/logo.svg"
-                                    width={40}
-                                    height={40}
-                                    className="h-8 w-auto"
+                                    width={36}
+                                    height={36}
+                                    className="h-7 w-auto"
                                 />
                             </Link>
                         </motion.div>
 
-                        <div className="hidden md:flex items-center space-x-4">
+                        <div className="hidden md:flex items-center space-x-1">
                             {LINKS.map((l) => {
                                 const isActive = pathname === l.href;
                                 return (
                                     <Link
                                         key={l.href}
                                         href={l.href}
-                                        // FIX: Added subtle lift and background fade on hover
-                                        className={`relative px-4 py-2 text-lg font-semibold rounded-full z-10 transition-all duration-300 ease-out hover:-translate-y-0.5 ${isActive
-                                            ? 'text-white hover:shadow-lg hover:shadow-black/20'
+                                        className={`relative px-4 py-2 text-sm font-semibold rounded-full z-10 transition-all duration-300 ease-out hover:-translate-y-0.5 ${isActive
+                                            ? 'text-white'
                                             : 'text-gray-600 hover:text-black hover:bg-gray-100'
                                             }`}
                                     >
@@ -132,22 +128,19 @@ const Navbar = () => {
 
                     {/* Right Side: Auth Buttons & Mobile Toggle */}
                     <div className="flex items-center gap-3">
-                        <div className="hidden md:flex items-center gap-4">
+                        <div className="hidden md:flex items-center gap-3">
                             {!showAuthButtons ? null : status === 'authenticated' ? (
                                 <>
                                     <Link
                                         href="/dashboard"
-                                        className="text-sm font-medium p-4 border border-black/20 bg-black rounded-full text-white duration-300 hover:-translate-y-0.5 transform inline-block transition hover:bg-slate-800 whitespace-nowrap w-full sm:w-auto"
+                                        className="text-sm font-semibold px-5 py-2.5 border border-black/20 bg-black rounded-full text-white duration-300 hover:-translate-y-0.5 transform inline-block transition hover:bg-slate-800 whitespace-nowrap"
                                     >
                                         Dashboard
                                     </Link>
-                                    <motion.div
-                                        whileHover={buttonHoverSpring}
-                                        whileTap={buttonTapSpring}
-                                    >
+                                    <motion.div whileHover={buttonHoverSpring} whileTap={buttonTapSpring}>
                                         <button
                                             onClick={() => signOut({ callbackUrl: '/' })}
-                                            className="inline-flex cursor-pointer items-center px-5 py-2 bg-gray-100 text-black text-sm font-semibold rounded-full hover:bg-gray-200 hover:shadow-md transition-all duration-300 shadow-sm"
+                                            className="inline-flex cursor-pointer items-center px-5 py-2.5 bg-gray-100 text-black text-sm font-semibold rounded-full hover:bg-gray-200 transition-all duration-300"
                                         >
                                             Log out
                                         </button>
@@ -157,17 +150,14 @@ const Navbar = () => {
                                 <>
                                     <Link
                                         href="/login"
-                                        className="text-sm font-medium text-gray-700 hover:text-black transition-colors duration-300 hover:-translate-y-0.5 transform inline-block"
+                                        className="text-sm font-semibold text-gray-700 hover:text-black transition-colors duration-300 hover:-translate-y-0.5 transform inline-block"
                                     >
                                         Log in
                                     </Link>
-                                    <motion.div
-                                        whileHover={buttonHoverSpring}
-                                        whileTap={buttonTapSpring}
-                                    >
+                                    <motion.div whileHover={buttonHoverSpring} whileTap={buttonTapSpring}>
                                         <Link
                                             href="/signup"
-                                            className="inline-flex items-center px-5 py-2 bg-black text-white text-sm font-semibold rounded-full hover:bg-gray-800 hover:shadow-lg hover:shadow-black/30 transition-all duration-300 shadow-md shadow-black/20"
+                                            className="inline-flex items-center px-5 py-2.5 bg-black text-white text-sm font-semibold rounded-full hover:bg-gray-800 transition-all duration-300"
                                         >
                                             Sign up
                                         </Link>
@@ -176,7 +166,7 @@ const Navbar = () => {
                             )}
                         </div>
 
-                        {/* Mobile Menu Button (Animated Hamburger) */}
+                        {/* Mobile Menu Button */}
                         <div className="flex md:hidden">
                             <motion.button
                                 aria-label="Toggle menu"
@@ -229,7 +219,6 @@ const Navbar = () => {
                                     <Link
                                         href={l.href}
                                         onClick={() => setOpen(false)}
-                                        // FIX: Added horizontal slide effect on hover
                                         className={`block px-4 py-3 rounded-2xl text-base font-medium transition-all duration-200 ease-out hover:translate-x-1 ${pathname === l.href
                                             ? 'bg-black text-white'
                                             : 'text-gray-700 hover:bg-gray-100 hover:text-black'
@@ -240,7 +229,6 @@ const Navbar = () => {
                                 </motion.div>
                             ))}
 
-                            {/* Mobile Auth Buttons */}
                             <motion.div
                                 variants={itemVariants}
                                 className="pt-3 mt-2 border-t border-gray-100 flex flex-col gap-3"

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import Toaster from "@/components/Toaster"; // FIX: Import the custom Toaster component
 
 const geistSans = Geist({
@@ -38,6 +39,7 @@ export default function RootLayout({
           {children}
           {/* FIX: Using the custom Toaster component */}
           <Toaster />
+          <Footer />
         </SessionProvider>
       </body>
     </html>
