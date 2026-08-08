@@ -17,14 +17,12 @@ export default function SignupForm() {
 
   if (isLoggedIn) {
     return (
-      <div className="flex flex-col gap-4 sm:flex-row w-full max-w-xl">
-        <Link
-          href="/dashboard"
-          className="rounded-full border border-black/20 bg-black px-10 py-4 text-center font-semibold text-white transition hover:bg-slate-800 whitespace-nowrap w-full sm:w-auto"
-        >
-          Go to Dashboard
-        </Link>
-      </div>
+      <Link
+        href="/dashboard"
+        className="rounded-full border border-black/20 bg-black px-10 py-4 text-center font-semibold text-white transition hover:bg-slate-800 whitespace-nowrap w-full sm:w-auto"
+      >
+        Go to Dashboard
+      </Link>
     );
   }
 

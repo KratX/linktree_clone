@@ -31,7 +31,10 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts",
-    "components/home/SignupForm.js"
+    "components/home/SignupForm.js",
+    "app/products/page.js",
+    "app/pricing/page.js",
+    "app/marketplace/page.js"
   ],
   "exclude": ["node_modules"]
 }

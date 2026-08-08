@@ -18,7 +18,7 @@ export default function Hero() {
                         Instagram, TikTok, Twitter, YouTube and other social media profiles.
                     </p>
 
-                    <div className="mt-10">
+                    <div className="mt-10 flex flex-col gap-4 sm:flex-row w-full max-w-xl">
                         <SignupForm />
                     </div>
 

@@ -22,7 +22,11 @@ const products = [
     name: "Shop",
     description:
       "Turn your profile into a storefront. List products, take orders, and keep the checkout on-brand.",
-    points: ["No separate site needed", "Inventory sync", "Mobile-first checkout"],
+    points: [
+      "No separate site needed",
+      "Inventory sync",
+      "Mobile-first checkout",
+    ],
   },
   {
     icon: CreditCard,
@@ -60,16 +64,13 @@ export default function ProductsPage() {
       {/* Hero */}
       <section className="bg-slate-50 px-6 pb-16 pt-40 md:px-10 lg:px-16">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="mb-5 inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
-            Products
-          </p>
           <h1 className="text-5xl font-black leading-[0.95] text-slate-900 sm:text-6xl">
             Every tool you need, built into one link.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg font-medium leading-8 text-slate-500">
-            Linktree isn't just a page of buttons. It's a small toolkit for
-            running your audience, your storefront, and your income — all
-            from one place.
+            Linktree isn&apos;t just a page of buttons. It&apos;s a small
+            toolkit for running your audience, your storefront, and your income
+            — all from one place.
           </p>
         </div>
       </section>
@@ -119,14 +120,31 @@ export default function ProductsPage() {
 
           <div className="mt-14 grid gap-8 md:grid-cols-3">
             {[
-              { step: "01", title: "Claim your link", copy: "Pick your handle and choose a starting template." },
-              { step: "02", title: "Add what matters", copy: "Drop in your links, shop, and socials — reorder anytime." },
-              { step: "03", title: "Share everywhere", copy: "Put one link in every bio and watch the clicks roll in." },
+              {
+                step: "01",
+                title: "Claim your link",
+                copy: "Pick your handle and choose a starting template.",
+              },
+              {
+                step: "02",
+                title: "Add what matters",
+                copy: "Drop in your links, shop, and socials — reorder anytime.",
+              },
+              {
+                step: "03",
+                title: "Share everywhere",
+                copy: "Put one link in every bio and watch the clicks roll in.",
+              },
             ].map((s) => (
-              <div key={s.step} className="rounded-3xl border border-white/10 bg-white/5 p-7">
+              <div
+                key={s.step}
+                className="rounded-3xl border border-white/10 bg-white/5 p-7"
+              >
                 <p className="text-sm font-black text-[#d2e823]">{s.step}</p>
                 <p className="mt-3 text-lg font-bold">{s.title}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-400">{s.copy}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  {s.copy}
+                </p>
               </div>
             ))}
           </div>

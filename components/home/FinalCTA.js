@@ -10,7 +10,7 @@ export default function FinalCTA() {
                 <p className="mt-5 text-lg font-semibold text-[#254f1a]/80">
                     Set it up in minutes. Free forever, upgrade whenever you&apos;re ready.
                 </p>
-                <div className="mt-10 flex justify-center">
+                <div className="mt-10 flex items-center justify-center">
                     <SignupForm />
                 </div>
             </div>

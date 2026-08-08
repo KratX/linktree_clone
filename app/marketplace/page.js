@@ -57,9 +57,6 @@ export default function MarketplacePage() {
       {/* Hero */}
       <section className="bg-slate-50 px-6 pb-12 pt-40 md:px-10 lg:px-16">
         <div className="mx-auto max-w-4xl text-center">
-          <p className="mb-5 inline-flex rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.25em] text-slate-500">
-            Marketplace
-          </p>
           <h1 className="text-5xl font-black leading-[0.95] text-slate-900 sm:text-6xl">
             Turn your audience into income.
           </h1>
@@ -114,8 +111,8 @@ export default function MarketplacePage() {
             </h2>
             <p className="mt-6 max-w-lg text-slate-400 leading-7">
               Every order, tip, and booking lands in the same place your
-              clicks do — so you're never toggling between five different
-              tools to see how you're doing.
+              clicks do — so you&apos;re never toggling between five different
+              tools to see how you&apos;re doing.
             </p>
             <Link
               href="/pricing"
@@ -127,7 +124,7 @@ export default function MarketplacePage() {
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <p className="text-sm font-semibold text-slate-300">Today's activity</p>
+              <p className="text-sm font-semibold text-slate-300">Today&apos;s activity</p>
               <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-400">
                 Live
               </span>
