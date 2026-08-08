@@ -4,8 +4,9 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb-client";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
-import { authConfig } from "./auth.config";
+import { authConfig, ADMIN_EMAIL } from "./auth.config"; // FIX: Imported ADMIN_EMAIL separately
 import { emailBloom } from "@/lib/bloomFilter";
+import { isBanned } from "@/lib/adminUtils";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
@@ -34,6 +35,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (!user || !user.hashedPassword) throw new Error("No user found.");
 
+                // Check if user is banned before allowing login
+                if (isBanned(user.bannedUntil)) {
+                    throw new Error("Your account has been suspended.");
+                }
+
                 const isValid = await bcrypt.compare(credentials.password, user.hashedPassword);
                 if (!isValid) throw new Error("Incorrect password");
 
@@ -47,35 +53,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async jwt({ token, user, trigger, session }) {
             if (user) {
                 token.id = user.id;
-                if (user.username) {
-                    token.username = user.username;
-                }
+                if (user.username) token.username = user.username;
+                // FIX: Use the imported ADMIN_EMAIL variable
+                token.role = user.email === ADMIN_EMAIL ? "admin" : "user";
             }
-
             if (trigger === "update" && session?.username) {
                 token.username = session.username;
             }
-
             return token;
         },
 
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = token.id;
-                if (token.username) {
-                    session.user.username = token.username;
-                }
+                if (token.username) session.user.username = token.username;
+                session.user.role = token.role;
             }
             return session;
         },
 
-        // FIX: Sync Bloom Filter when Google user signs in
         async signIn({ user, account }) {
             if (account?.provider === "google" && user?.email) {
                 const client = await clientPromise;
                 const db = client.db();
-                const cacheCollection = db.collection("bloom_cache");
 
+                // Check if Google user is banned
+                const dbUser = await db.collection("users").findOne({ email: user.email });
+                if (dbUser && isBanned(dbUser.bannedUntil)) {
+                    return false; // Block login
+                }
+
+                // Sync Bloom Filter
+                const cacheCollection = db.collection("bloom_cache");
                 const emailCache = await cacheCollection.findOne({ _id: "emails" });
                 if (emailCache?.state) emailBloom.importState(emailCache.state);
 
@@ -91,7 +100,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return true;
         }
     },
-    // Explicitly define pages here so the API route uses them
     pages: {
         signIn: "/login",
         error: "/auth/error",
