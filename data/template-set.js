@@ -3,7 +3,6 @@ export const TEMPLATES = [
     // ==========================================
     // CREATOR (5 Solids, 11 Images)
     // ==========================================
-    { id: "c-s1", name: "Peachy Keen", category: "Creator", bgColor: "#FFDAB9", boxColor: "#1A1A1A", textColor: "#1A1A1A", iconColor: "#1A1A1A" },
     { id: "c-s2", name: "Mint Tech", category: "Creator", bgColor: "#E0F2F1", boxColor: "#00897B", textColor: "#004D40", iconColor: "#004D40" },
     { id: "c-s3", name: "Lavender Haze", category: "Creator", bgColor: "#EDE7F6", boxColor: "#5E35B1", textColor: "#311B92", iconColor: "#311B92" },
     { id: "c-s4", name: "Charcoal Pop", category: "Creator", bgColor: "#1C1C1C", boxColor: "#FF4081", textColor: "#FFFFFF", iconColor: "#FF4081" },

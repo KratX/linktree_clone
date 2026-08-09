@@ -14,6 +14,8 @@ function SignupForm() {
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    // FIX: Added state for confirm password
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,6 +23,15 @@ function SignupForm() {
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
+        const password = formData.get("password");
+
+        // FIX: Check if passwords match before submitting to server
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            setLoading(false);
+            return;
+        }
+
         const result = await signupAction(formData);
 
         if (result?.error) {
@@ -111,6 +122,22 @@ function SignupForm() {
                                     type="password"
                                     required
                                     placeholder="Password"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-gray-900 placeholder-gray-400"
+                                />
+                            </div>
+                            {/* FIX: Added Confirm Password Input */}
+                            <div>
+                                <label htmlFor="confirmPassword" className="sr-only">
+                                    Confirm Password
+                                </label>
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type="password"
+                                    required
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Confirm Password"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-gray-900 placeholder-gray-400"
                                 />
                             </div>

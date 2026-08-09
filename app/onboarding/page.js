@@ -10,6 +10,8 @@ export default function OnboardingPage() {
     const { update } = useSession(); // NextAuth function to update session state
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    // FIX: Added state for confirm password
+    const [confirmPassword, setConfirmPassword] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,6 +19,15 @@ export default function OnboardingPage() {
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
+        const password = formData.get("password");
+
+        // FIX: Check if passwords match before submitting to server
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
+            setLoading(false);
+            return;
+        }
+
         const result = await setUsernameAction(formData);
 
         if (result?.error) {
@@ -51,7 +62,6 @@ export default function OnboardingPage() {
                                 type="text"
                                 required
                                 className="w-full pl-20 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                                placeholder="johndoe"
                             />
                         </div>
                     </div>
@@ -66,6 +76,20 @@ export default function OnboardingPage() {
                             placeholder="••••••••"
                         />
                         <p className="text-xs text-gray-400 mt-1">Min 8 characters, 1 uppercase, 1 number.</p>
+                    </div>
+
+                    {/* FIX: Added Confirm Password Input */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                        <input
+                            name="confirmPassword"
+                            type="password"
+                            required
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                            placeholder="••••••••"
+                        />
                     </div>
 
                     <button

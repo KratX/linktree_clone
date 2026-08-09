@@ -2,9 +2,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getAdminUsers, banUserAction, unbanUserAction } from "@/actions/admin";
-import { Search, ChevronLeft, ChevronRight, Ban, ShieldCheck, UserIcon } from "lucide-react";
-import { formatBanDate, isBanned } from "@/lib/adminUtils";
+import { getAdminUsers, banUserAction, unbanUserAction, getAdminUserDetails, adminEditLinkAction, adminDeleteLinkAction } from "@/actions/admin";
+import { Search, ChevronLeft, ChevronRight, Ban, ShieldCheck, UserIcon, Save, Trash2, Link2 } from "lucide-react";
+import { isBanned } from "@/lib/adminUtils";
 
 export default function AdminUsersPage() {
     const [data, setData] = useState({ users: [], total: 0, totalPages: 0 });
@@ -12,7 +12,11 @@ export default function AdminUsersPage() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("");
+
+    // State for the Deep-Dive Drawer
     const [selectedUser, setSelectedUser] = useState(null);
+    const [userDetails, setUserDetails] = useState(null);
+    const [loadingDetails, setLoadingDetails] = useState(false);
     const [banDuration, setBanDuration] = useState("1");
 
     useEffect(() => {
@@ -25,10 +29,18 @@ export default function AdminUsersPage() {
         fetchUsers();
     }, [page, search, filter]);
 
+    // FIX: Fetch full details when a user is clicked
+    const handleManageClick = async (user) => {
+        setSelectedUser(user);
+        setLoadingDetails(true);
+        const details = await getAdminUserDetails(user._id);
+        setUserDetails(details);
+        setLoadingDetails(false);
+    };
+
     const handleBan = async (userId) => {
         await banUserAction(userId, banDuration);
         setSelectedUser(null);
-        // Refresh data
         const res = await getAdminUsers({ page, limit: 10, search, filter });
         setData(res);
     };
@@ -38,6 +50,15 @@ export default function AdminUsersPage() {
         setSelectedUser(null);
         const res = await getAdminUsers({ page, limit: 10, search, filter });
         setData(res);
+    };
+
+    // FIX: Handle link deletion inside the drawer
+    const handleDeleteLink = async (linkId) => {
+        if (!confirm("Are you sure you want to permanently delete this link?")) return;
+        await adminDeleteLinkAction(linkId);
+        // Refresh the details view
+        const details = await getAdminUserDetails(selectedUser._id);
+        setUserDetails(details);
     };
 
     return (
@@ -95,7 +116,7 @@ export default function AdminUsersPage() {
                                         )}
                                     </td>
                                     <td className="p-4 text-right">
-                                        <button onClick={() => setSelectedUser(user)} className="text-xs font-bold text-blue-400 hover:underline">
+                                        <button onClick={() => handleManageClick(user)} className="text-xs font-bold text-blue-400 hover:underline">
                                             Manage
                                         </button>
                                     </td>
@@ -129,12 +150,13 @@ export default function AdminUsersPage() {
 
             {/* User Deep-Dive Drawer */}
             {selectedUser && (
-                <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setSelectedUser(null)}>
+                <div className="fixed inset-0 z-50 flex justify-end" onClick={() => { setSelectedUser(null); setUserDetails(null); }}>
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
                     <div
-                        className="relative w-full max-w-md h-full bg-slate-900 border-l border-white/10 p-8 overflow-y-auto"
+                        className="relative w-full max-w-lg h-full bg-slate-900 border-l border-white/10 p-8 overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                     >
+                        {/* Header */}
                         <div className="flex items-center gap-4 mb-8">
                             <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
                                 <UserIcon size={24} className="text-slate-400" />
@@ -145,56 +167,125 @@ export default function AdminUsersPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-4 mb-8">
-                            <div className="bg-white/5 p-4 rounded-xl">
-                                <p className="text-xs text-slate-500 mb-1">Email</p>
-                                <p className="text-sm font-medium">{selectedUser.email}</p>
-                            </div>
-                            <div className="bg-white/5 p-4 rounded-xl">
-                                <p className="text-xs text-slate-500 mb-1">Account Status</p>
-                                {isBanned(selectedUser.bannedUntil) ? (
-                                    <p className="text-sm font-bold text-red-400">Banned until {formatBanDate(selectedUser.bannedUntil)}</p>
-                                ) : (
-                                    <p className="text-sm font-bold text-green-400">Active</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Admin Actions */}
-                        <div className="border-t border-white/10 pt-6">
-                            <h3 className="text-sm font-bold mb-4">Admin Actions</h3>
-
-                            {isBanned(selectedUser.bannedUntil) ? (
-                                <button
-                                    onClick={() => handleUnban(selectedUser._id)}
-                                    className="w-full flex items-center justify-center gap-2 bg-green-500/20 text-green-400 py-3 rounded-xl font-semibold hover:bg-green-500/30 transition-colors"
-                                >
-                                    <ShieldCheck size={18} /> Unban User
-                                </button>
-                            ) : (
-                                <div className="space-y-3">
-                                    <select
-                                        value={banDuration}
-                                        onChange={(e) => setBanDuration(e.target.value)}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
-                                    >
-                                        <option value="1">Ban for 1 Day</option>
-                                        <option value="7">Ban for 7 Days</option>
-                                        <option value="30">Ban for 30 Days</option>
-                                        <option value="permanent">Ban Permanently</option>
-                                    </select>
-                                    <button
-                                        onClick={() => handleBan(selectedUser._id)}
-                                        className="w-full flex items-center justify-center gap-2 bg-red-500/20 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-500/30 transition-colors"
-                                    >
-                                        <Ban size={18} /> Ban User
-                                    </button>
+                        {loadingDetails ? (
+                            <div className="text-center text-slate-500 py-10">Loading details...</div>
+                        ) : userDetails ? (
+                            <>
+                                {/* Profile Info Grid */}
+                                <div className="grid grid-cols-2 gap-4 mb-8">
+                                    <div className="bg-white/5 p-4 rounded-xl col-span-2">
+                                        <p className="text-xs text-slate-500 mb-1">Email</p>
+                                        <p className="text-sm font-medium">{userDetails.user.email}</p>
+                                    </div>
+                                    <div className="bg-white/5 p-4 rounded-xl col-span-2">
+                                        <p className="text-xs text-slate-500 mb-1">Bio</p>
+                                        <p className="text-sm text-wrap font-medium">{userDetails.user.bio || "No bio set"}</p>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
+
+                                {/* Links Management */}
+                                <div className="mb-8">
+                                    <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                                        <Link2 size={16} /> User Links ({userDetails.links.length})
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {userDetails.links.length === 0 ? (
+                                            <p className="text-sm text-slate-500 bg-white/5 p-4 rounded-xl text-center">This user has no links.</p>
+                                        ) : (
+                                            userDetails.links.map(link => (
+                                                <AdminLinkRow key={link._id} link={link} onDelete={handleDeleteLink} />
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Admin Actions */}
+                                <div className="border-t border-white/10 pt-6">
+                                    <h3 className="text-sm font-bold mb-4">Moderation Actions</h3>
+
+                                    {isBanned(userDetails.user.bannedUntil) ? (
+                                        <button
+                                            onClick={() => handleUnban(selectedUser._id)}
+                                            className="w-full flex items-center justify-center gap-2 bg-green-500/20 text-green-400 py-3 rounded-xl font-semibold hover:bg-green-500/30 transition-colors"
+                                        >
+                                            <ShieldCheck size={18} /> Unban User
+                                        </button>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <select
+                                                value={banDuration}
+                                                onChange={(e) => setBanDuration(e.target.value)}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
+                                            >
+                                                <option value="1">Ban for 1 Day</option>
+                                                <option value="7">Ban for 7 Days</option>
+                                                <option value="30">Ban for 30 Days</option>
+                                                <option value="permanent">Ban Permanently</option>
+                                            </select>
+                                            <button
+                                                onClick={() => handleBan(selectedUser._id)}
+                                                className="w-full flex items-center justify-center gap-2 bg-red-500/20 text-red-400 py-3 rounded-xl font-semibold hover:bg-red-500/30 transition-colors"
+                                            >
+                                                <Ban size={18} /> Ban User
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : null}
                     </div>
                 </div>
             )}
         </div>
+    );
+}
+
+// FIX: New sub-component for inline link editing
+function AdminLinkRow({ link, onDelete }) {
+    const [title, setTitle] = useState(link.title);
+    const [url, setUrl] = useState(link.url);
+    const [saving, setSaving] = useState(false);
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("url", url);
+        await adminEditLinkAction(link._id, formData);
+        setSaving(false);
+    };
+
+    return (
+        <form onSubmit={handleSave} className="bg-white/5 p-4 rounded-xl space-y-2">
+            <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-transparent border-b border-white/10 text-sm font-bold focus:outline-none focus:border-white pb-1"
+            />
+            <input
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="w-full bg-transparent text-xs text-slate-400 focus:outline-none focus:text-white"
+            />
+            <div className="flex justify-end gap-2 pt-2">
+                <button
+                    type="button"
+                    onClick={() => onDelete(link._id)}
+                    className="flex items-center gap-1 text-xs font-bold text-red-400 bg-red-500/10 px-3 py-1.5 rounded-lg hover:bg-red-500/20"
+                >
+                    <Trash2 size={12} /> Delete
+                </button>
+                <button
+                    type="submit"
+                    disabled={saving}
+                    className="flex items-center gap-1 text-xs font-bold text-white bg-white/10 px-3 py-1.5 rounded-lg hover:bg-white/20"
+                >
+                    <Save size={12} /> {saving ? "Saving..." : "Save"}
+                </button>
+            </div>
+        </form>
     );
 }
